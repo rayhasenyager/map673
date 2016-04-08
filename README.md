@@ -1,2 +1,2 @@
-# map673
-Modules for NMP MAP673 course
+# map673-spr16
+Course repository for the MAP673 Spring 2016 term
