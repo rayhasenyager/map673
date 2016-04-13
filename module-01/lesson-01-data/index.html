@@ -24,7 +24,7 @@
         
         header {
             width: 80%;
-            margin: 10px auto;
+            margin: 10px auto 10px auto;
         }
         
         h1 {
@@ -41,14 +41,14 @@
         #map {
             width: 80%;
             height: 540px;
-            margin: 10px auto;
-            background: #e9e2e2;
+            margin: 10px auto 10px auto;
+            background: whitesmoke;
             border: 2px solid #dddedf;
         }
         
         footer {
             width: 80%;
-            margin: 10px auto;
+            margin: 10px auto 10px auto;
         }
         
         p {
@@ -111,8 +111,7 @@
     </footer>
 
     <script>
-        $("h1").html("Total Housing Units in Kentucky");
-        $("h2").html("Using 2010 US Census data");
+        $("h1").html("Housing Ownership in Kentucky");
 
         var options = {
             center: [37.8, -85.8],
@@ -122,9 +121,8 @@
         var map = L.map('map', options);
 
         var dataLayer,
-            attribute = "OWNED_FREE",
+            attribute = "OWNED_MORT",
             norm = "OWNER";
-            name = "NAME";
 
         $.getJSON("ky_counties_housing.json", function(data) {
 
@@ -138,75 +136,86 @@
                     };
                 }
             }).addTo(map);
-            
+
             drawMap();
-            
         });
 
         function drawMap() {
 
             var breaks = getClassBreaks();
-            
+
+            var breaks = getClassBreaks();
+
             dataLayer.eachLayer(function(layer) {
                 layer.setStyle({
                     fillColor: getColor(layer.feature.properties[attribute] / layer.feature.properties[norm], breaks)
                 });
             });
-            
-            dataLayer.eachLayer(function(layer, dataLayer) {
-                layer.bindPopup('<b>' + layer.feature.properties[name] + ' County<br></b>' + attribute + ': ' + ((layer.feature.properties[attribute] / layer.feature.properties[norm])*100).toLocaleString() + '%')
-                });
-            
             drawLegend(breaks);
         }
-
-        map.addControl(L.control.zoom({
-            position: 'topright'
-        }));
+        
+        map.addControl( L.control.zoom({ position: 'topright' }));
 
         function drawLegend(breaks) {
 
+            // create a new Leaflet control object, and position it top left
             var legend = L.control({
                 position: 'topleft'
             });
 
+            // when the legend is added to the map
             legend.onAdd = function() {
 
+                // create a new HTML <div> element and give it a class name of "legend"
                 var div = L.DomUtil.create('div', 'legend');
 
+                // first append an <h3> tag to the div holding the current attribute
+                // and norm values (i.e., the mapped phenomena)
                 div.innerHTML = "<h3>" + attribute + " per " + norm + "</h3>";
 
+                // for each of our breaks
                 for (var i = 0; i < breaks.length; i++) {
+                    // determine the color associated with each break value,
+                    // including the lower range value
                     var color = getColor(breaks[i][0], breaks);
 
+                    // concatenate a <span> tag styled with the color and the range values
+                    // of that class and include a label with the low and a high ends of that class range
                     div.innerHTML +=
                         '<span style="background:' + color + '"></span> ' +
                         '<label>' + (breaks[i][0] * 100).toLocaleString() + ' &mdash; ' +
-                        (breaks[i][1] * 100).toLocaleString() + '%</label>';
+                        (breaks[i][1] * 100).toLocaleString() + '</label>';
                 }
 
+                // return the populated div to be added to the map
                 return div;
             };
 
+            // add the legend to the map
             legend.addTo(map);
         }
 
         function getClassBreaks() {
+
+            // create empty Array for storing values
             var values = [];
 
+            // loop through all the counties
             dataLayer.eachLayer(function(layer) {
                 var value = layer.feature.properties[attribute] / layer.feature.properties[norm];
-                values.push(value);
+                values.push(value); // push the normalized value for each layer into the Array
             });
 
+            // determine similar clusters
             var clusters = ss.ckmeans(values, 5);
 
+            // create an array of the lowest value within each cluster
             var breaks = clusters.map(function(cluster) {
                 return [cluster[0], cluster.pop()];
             });
 
-            return breaks;
-        }
+            return breaks; // return Array of class breaks
+        } // end getClassBreaks function
 
         function getColor(d, breaks) {
 
