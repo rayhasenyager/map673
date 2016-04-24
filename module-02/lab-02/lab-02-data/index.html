@@ -153,15 +153,15 @@
             zoomControl: false
         }
 
-        //variable designates descriptive labels for the data used in the map.
+        //global variables designating descriptive labels for the data used in the map.
         var labels = {
             "VACANT": "vacant units",
-            "VACANT_FOR": "% vacant housing units for rent",
-            "VACANT_REN": "% vacant housing units rented, not occupied",
-            "VACANT_FO2": "% vacant housing units for sale"
+            "VACANT_FOR": "Vacant housing units for rent",
+            "VACANT_REN": "Vacant housing units rented, not occupied",
+            "VACANT_FO2": "Vacant housing units for sale"
         }
 
-        //@@@@@@@@@@@@
+        //creates the Leaflet map
         var map = L.map('map', options);
 
         //adds the zoom control to the top right of the screen.
@@ -169,15 +169,15 @@
             position: 'topright'
         }));
 
-        //names the key variables for the map for attibute and the normalizing factos
+        //names the key variables for the map for attibute and the normalizing factors
         var dataLayer,
             attribute = "VACANT_FOR",
             norm = "VACANT";
 
-        //ajax script that brings in the geoJson layer of polygons, county info, and housing data.
+        //ajax script request that brings in the geoJson data (eg. housing and county polygon data).
         $.getJSON("ky_counties_housing.json", function(data) {
 
-            //names a variable of the geoJson data
+            //creates the geoJson layer
             dataLayer = L.geoJson(data, {
                 //style information for the county polygons
                 style: function(feature) {
@@ -185,52 +185,61 @@
                         color: '#dddddd', //grey borders
                         weight: 2, //border thickness
                         fillOpacity: 1, //no opacity
-                        fillColor: '#1f78b4' //fill color of Kentucky Blue
+                        fillColor: '#1f78b4' //fill color (Kentucky Blue)
                     };
                 }
             //adds the polygons to the map    
             }).addTo(map);
 
-            //the four elements below call functions-- the empty parenthesis mean no information is being passed to the functions.
-            //call function for the legend
+            //the four elements below are calls for functions-- the empty parenthesis mean no information is being passed.
+            //map legend
             drawLegend();
-            //call function to the map for county color breaks
+            //county color breaks
             drawMap();
-            //call function for the info box
+            //info box
             drawInfo();
-            //call function for the user interface (drop down menu)
+            //user interface (drop down menu)
             buildUI();
         });
 
-        //initiates the 0
+        //executes draw map function
         function drawMap() {
 
+            //names variable function class breaks creation function.
             var breaks = getClassBreaks();
 
+            //loop for each GeoJson layer
             dataLayer.eachLayer(function(layer) {
 
+                //variable to shorten GeoJson properties.
                 var props = layer.feature.properties;
 
+                //GeoJson layer style setting to accomodate the break colors
                 layer.setStyle({
                     fillColor: getColor(props[attribute] /
                         props[norm], breaks)
                 });
+                //pop up text and data and calculated data
                 layer.bindPopup("<b>" + layer.feature.properties["NAME"] + " County</b></br>" +
                     labels[attribute] + ": " + ((layer.feature.properties[attribute] /
-                        layer.feature.properties[norm]) * 100).toLocaleString());
+                        layer.feature.properties[norm]) * 100).toLocaleString() + "%");
+                
+                //event for when user mouses over a polygon causing the border to turn yellow
                 layer.on('mouseover', function() {
                     layer.setStyle({
                         weight: 5,
                         color: '#FFFF00',
-                        dashArray: '',
-//                        fillOpacity: 1
+                        dashArray: ''
                     });
 
+                    //this script allows the mouseover to work in Internet Explorer and Opera
                     if (!L.Browser.ie && !L.Browser.opera) {
                         layer.bringToFront();
                     }
+                    //calls the undateInfo function and passes the 'this' jQuery selection
                     updateInfo(this);
                 });
+                //event for when the user moves the mouse away from a polygon returning the border to it previous style
                 layer.on('mouseout', function() {
                     layer.setStyle({
                         color: '#dddddd',
@@ -238,38 +247,51 @@
                     });
                 });
 
+                //event for mouseover to show data in the info window. 
                 dataLayer.on('mouseover', function() {
                     $(".info").show();
                 });
+                //event for mouseover to hide data in the info window. 
                 dataLayer.on('mouseout', function() {
                     $(".info").hide();
                 });
 
+                //calls the legend functionn and sends the break data to the function.
                 updateLegend(breaks);
             });
         }
 
+        //executes the class breaks function
         function getClassBreaks() {
 
+            //variable creating an empty array to hold data
             var values = [];
 
+            //loop
             dataLayer.eachLayer(function(layer) {
+                //calculation for the normalized value
                 var value = layer.feature.properties[attribute] / layer.feature.properties[norm];
+                //value being pushed to the clusters variable.
                 values.push(value);
             });
 
+            //creation of  5 clusters using simple statistics javascript.
             var clusters = ss.ckmeans(values, 5);
 
+            //returns the low and high value for each cluster.
             var breaks = clusters.map(function(cluster) {
                 return [cluster[0], cluster.pop()];
             });
 
+            //returns breaks array data
             return breaks;
 
         }
 
+        //executes function to return the color for each break based in the arrays received from the getClassBreaks function.
         function getColor(d, breaks) {
 
+            //each statement below returns a clor value based on the array value specified.
             if (d <= breaks[0][1]) {
                 return '#f1eef6';
             } else if (d <= breaks[1][1]) {
@@ -283,30 +305,41 @@
             }
         }
 
+        //executes the legend function.
         function drawLegend() {
 
+            //variable names the where the legend control will be placed on the map (topleft).
             var legend = L.control({
                 position: 'topleft'
             });
 
+            //when the legend is added to the map
             legend.onAdd = function(map) {
 
+                //creates a new HTML <div> element and names it 'legend'.
                 var div = L.DomUtil.create('div', 'legend');
 
+                //returns the <div> element
                 return div;
             };
 
+            //adds the legend to the map.
             legend.addTo(map);
         }
 
+        //executes the update legend function and receives the break arrays.
         function updateLegend(breaks) {
 
+            //variable for the html for the legend title
             var legend = $('.legend').html("<h3>" + labels[attribute] + "</h3><ul>");
 
+            //for each break
             for (var i = 0; i <= breaks.length - 1; i++) {
 
+                //determines color for each array set (span)
                 var color = getColor(breaks[i][0], breaks);
 
+                //creates the text for each break segement and multiplies each by 100 to make it a readable percentage.
                 legend.append(
                     '<span style="background:' + color + '"></span> ' +
                     '<label>' + (breaks[i][0] * 100).toLocaleString() + ' &mdash; ' +
@@ -315,43 +348,58 @@
 
         }
 
+        //executes the user interface function (drop down menu)
         function buildUI() {
 
+            //jQuery that listens for attribute in the drop down menu on each change.
             $('select[name="vacant"]').change(function() {
 
+                //adjusts the attribute to the value selected--receives the context of the event
                 attribute = ($(this).val());
+                //draws the map
                 drawMap();
 
             });
         }
 
+        //executes the info box function
         function drawInfo() {
 
+            //variable for where the info box will be placed on the map.
             var info = L.control({
                 position: 'topright'
             });
 
+            //receives the map data
             info.onAdd = function(map) {
 
+                //creates a <div> element 
                 var div = L.DomUtil.create('div', 'info');
 
+                //returns the <div> element.
                 return div;
 
             }
+            //adds the info box to the map
             info.addTo(map);
+            //jQuery to hide the info box
             $(".info").hide();
         }
 
+        //function to update the info box
         function updateInfo(layer) {
 
+            //shornes the layer properties
             var props = layer.feature.properties;
 
+            //html for the info box data to be displayed.
             var html = "<h3>" + props['NAME'] + " County</h3>" +
-                "total # housing units: <b>" + props["TOTAL"] + "</b><br>" +
-                "# vacant for rent: <b>" + props["VACANT_FOR"] + "</b><br>" +
-                "# vacant rented, not occupied: <b>" + props["VACANT_REN"] + "</b><br>" +
-                "# vacant for sale: <b>" + props["VACANT_FO2"] + "</b>"
+                "Total housing units: <b>" + props["TOTAL"] + "</b><br>" +
+                "Vacant housing units for rent: <b>" + props["VACANT_FOR"] + "</b><br>" +
+                "Vacant housing unitsrented, not occupied: <b>" + props["VACANT_REN"] + "</b><br>" +
+                "Vacant housing units for sale: <b>" + props["VACANT_FO2"] + "</b>"
 
+            //jquery passing the html info
             $(".info").html(html);
         }
 
