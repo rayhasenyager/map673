@@ -141,6 +141,9 @@
     </footer>
 
     <script>
+        //All comments appear above the code being referenced.
+        
+        //named variable calls for the maps center zoom level and does not allow for dragging or zoom. 
         var options = {
             center: [38.2, -85.8],
             zoom: 7.4,
@@ -150,6 +153,7 @@
             zoomControl: false
         }
 
+        //variable designates descriptive labels for the data used in the map.
         var labels = {
             "VACANT": "vacant units",
             "VACANT_FOR": "% vacant housing units for rent",
@@ -157,35 +161,48 @@
             "VACANT_FO2": "% vacant housing units for sale"
         }
 
+        //@@@@@@@@@@@@
         var map = L.map('map', options);
 
+        //adds the zoom control to the top right of the screen.
         map.addControl(L.control.zoom({
             position: 'topright'
         }));
 
+        //names the key variables for the map for attibute and the normalizing factos
         var dataLayer,
             attribute = "VACANT_FOR",
             norm = "VACANT";
 
+        //ajax script that brings in the geoJson layer of polygons, county info, and housing data.
         $.getJSON("ky_counties_housing.json", function(data) {
 
+            //names a variable of the geoJson data
             dataLayer = L.geoJson(data, {
+                //style information for the county polygons
                 style: function(feature) {
                     return {
-                        color: '#dddddd',
-                        weight: 2,
-                        fillOpacity: 1,
-                        fillColor: '#1f78b4'
+                        color: '#dddddd', //grey borders
+                        weight: 2, //border thickness
+                        fillOpacity: 1, //no opacity
+                        fillColor: '#1f78b4' //fill color of Kentucky Blue
                     };
                 }
+            //adds the polygons to the map    
             }).addTo(map);
 
+            //the four elements below call functions-- the empty parenthesis mean no information is being passed to the functions.
+            //call function for the legend
             drawLegend();
+            //call function to the map for county color breaks
             drawMap();
+            //call function for the info box
             drawInfo();
+            //call function for the user interface (drop down menu)
             buildUI();
         });
 
+        //initiates the 0
         function drawMap() {
 
             var breaks = getClassBreaks();
@@ -202,23 +219,34 @@
                     labels[attribute] + ": " + ((layer.feature.properties[attribute] /
                         layer.feature.properties[norm]) * 100).toLocaleString());
                 layer.on('mouseover', function() {
+                    layer.setStyle({
+                        weight: 5,
+                        color: '#FFFF00',
+                        dashArray: '',
+//                        fillOpacity: 1
+                    });
+
+                    if (!L.Browser.ie && !L.Browser.opera) {
+                        layer.bringToFront();
+                    }
                     updateInfo(this);
-//                    highlightFeature(e);
                 });
-//                layer.on('mouseout', function() {
-//                    resetHighlight(e);
-//                });
-            });
+                layer.on('mouseout', function() {
+                    layer.setStyle({
+                        color: '#dddddd',
+                        weight: 2,
+                    });
+                });
 
-            dataLayer.on('mouseover', function() {
-                $(".info").show();
-            });
-            dataLayer.on('mouseout', function() {
-                $(".info").hide();
-            });
+                dataLayer.on('mouseover', function() {
+                    $(".info").show();
+                });
+                dataLayer.on('mouseout', function() {
+                    $(".info").hide();
+                });
 
-            updateLegend(breaks);
-
+                updateLegend(breaks);
+            });
         }
 
         function getClassBreaks() {
@@ -326,25 +354,6 @@
 
             $(".info").html(html);
         }
-
-        function highlightFeature(e) {
-            var layer = e.target;
-
-            layer.setStyle({
-                weight: 5,
-                color: '#FFFF00',
-                dashArray: '',
-                fillOpacity: 0.7
-            });
-
-            if (!L.Browser.ie && !L.Browser.opera) {
-                layer.bringToFront();
-            }
-        }
-
-//        function resetHighlight(e) {
-//            geojson.resetStyle(e.target);
-//        }
 
     </script>
 
