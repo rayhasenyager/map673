@@ -522,6 +522,7 @@ We're now ready to move on to the next element plane to refine the structure of 
 
 ## Additional Reading and Resources
 
-* [The Elements of User Experience](https://bpv-tese.googlecode.com/hg/src/referencias/Garrett2011%20-%20The%20Elements%20of%20User%20Experience%202nd%20edition.pdf) (2011)
+* [The Elements of User Experience Graphic](docs/Elements-of-User-Experience.pdf) (2000)
+* [The Elements of User Experience (Chapters 1 - 5)](docs/Garrett2011_chapters_1-5.pdf) (2011)
 * [The origin of personas](http://www.cooper.com/journal/2008/05/the_origin_of_personas) (2008)
 * [Addressing Map Interface Usability: Learning from the Lakeshore Nature Preserve Interactive Map](http://cartographicperspectives.org/index.php/journal/article/viewFile/cp60-roth-harrower/292) (2008)
