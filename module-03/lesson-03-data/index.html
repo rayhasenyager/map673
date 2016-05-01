@@ -292,9 +292,8 @@
             for (var i = 0; i < breaks.length - 1; i++) {
 
                 var color = getColor(breaks[i + 1], breaks);
-                $('.legend ul').append('<li><span style="background:' + color + '"></span> ' + breaks[i] + ' &mdash; ' + breaks[i + 1] + '</li>');
+                legend.append('<li><span style="background:' + color + '"></span> ' + breaks[i] + ' &mdash; ' + breaks[i + 1] + '</li>');
             }
-            legend.append("</ul>");
         }
 
         // function to create the range slider

@@ -128,6 +128,21 @@
             font-size: 1.1em;
             font-weight: bold;
         }
+        
+        .info {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: rgba(75, 75, 75, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            text-align: right;
+            color: whitesmoke;
+        }
+        
+        .info h3 {
+            margin: 0;
+            color: whitesmoke;
+        }
 
     </style>
 </head>
@@ -147,7 +162,7 @@
             center: [33, -87],
             zoom: 7,
             minZoom: 7,
-            maxZoom: 12,
+            maxZoom: 8,
             dragging: true,
             zoomControl: true
         }
@@ -156,7 +171,7 @@
         // load map tiles and add to map
         var tiles = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-            maxZoom: 16
+            maxZoom: 8
         }).addTo(map);
 
         // declare global variables
@@ -189,31 +204,34 @@
             drawLegend();
             drawMap(counties);
             createSliderUI();
+            drawInfo();
         }
 
         // function to draw the map
         function drawMap(counties) {
+
             dataLayer = L.geoJson(counties, {
                 style: function(feature) {
                     return {
                         color: '#252525',
-                        weight: 1,
+                        weight: 2,
                         fillOpacity: 1,
                         fillColor: '#1f78b4'
                     }
                 }
+
             }).addTo(map);
-            dataLayer.eachLayer(function(layer) {
-                layer.setStyle({
-                    fillColor: layer.feature.properties[counties]
-                });
-                updateMap();
-            });
+
+            updateMap();
         }
 
         // function to update the map
         function updateMap() {
+
+            //variable for class breaks function
             var breaks = getClassBreaks();
+
+            //@@@@@@@@##@#@
             dataLayer.eachLayer(function(layer) {
                 layer.setStyle({
                     fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
@@ -231,11 +249,50 @@
             //loop
             dataLayer.eachLayer(function(layer) {
 
+                var props = layer.feature.properties;
+
                 //calculation for the normalized value
-                var value = layer.feature.properties[attribute];
+                var value = props[attribute];
 
                 //value being pushed to the clusters variable.
                 values.push(value);
+
+                //pop up text and data and calculated data
+                layer.bindPopup("<b>" + props["county"] + " County</b><br>" + value + "%");
+                
+                //event for when user mouses over a polygon causing the border to turn yellow
+                layer.on('mouseover', function() {
+                    layer.setStyle({
+                        weight: 5,
+                        color: '#FFFF00',
+                        dashArray: ''
+                    });
+
+                    //this script allows the mouseover to work in Internet Explorer and Opera
+                    if (!L.Browser.ie && !L.Browser.opera) {
+                        layer.bringToFront();
+                    }
+                    //calls the undateInfo function and passes the 'this' jQuery selection
+                    updateInfo(this);
+                });
+                
+                //event for when the user moves the mouse away from a polygon returning the border to it previous style
+                layer.on('mouseout', function() {
+                    layer.setStyle({
+                        color: '#252525',
+                        weight: 2,
+                    });
+                });
+
+                //event for mouseover to show data in the info window. 
+                dataLayer.on('mouseover', function() {
+                    $(".info").show();
+                });
+                
+                //event for mouseover to hide data in the info window. 
+                dataLayer.on('mouseout', function() {
+                    $(".info").hide();
+                });
             });
 
             //creation of 5 quintiles using simple statistics javascript.
@@ -271,7 +328,7 @@
             });
 
             //when the legend is added to the map
-            legend.onAdd = function(map) {
+            legend.onAdd = function() {
 
                 //creates a new HTML <div> element and names it 'legend'.
                 var div = L.DomUtil.create('div', 'legend');
@@ -338,6 +395,56 @@
                 attribute = $(this).val();
                 updateMap();
             });
+        }
+
+        //executes the info box function
+        function drawInfo() {
+
+            //variable for where the info box will be placed on the map.
+            var info = L.control({
+                position: 'topright'
+            });
+
+            //receives the map data
+            info.onAdd = function(map) {
+
+                //creates a <div> element 
+                var div = L.DomUtil.create('div', 'info');
+
+                //returns the <div> element.
+                return div;
+            }
+
+            //adds the info box to the map
+            info.addTo(map);
+
+            //jQuery to hide the info box
+            $(".info").hide();
+        }
+
+        //function to update the info box
+        function updateInfo(layer) {
+
+            //shortens the layer properties
+            var props = layer.feature.properties;
+
+            //html for the info box data to be displayed.
+            var html = "<h3>" + props['county'] + " County Population / Growth</h3>" +
+                "1900: " + props["1900pop"] + " <- - -> (" + "base year)<br>" +
+                "1910: " + props["1910pop"] + " <- - -> (" + props["1910"] + "% change)<br>" +
+                "1920: " + props["1920pop"] + " <- - -> (" + props["1920"] + "% change)<br>" +
+                "1930: " + props["1930pop"] + " <- - -> (" + props["1930"] + "% change)<br>" +
+                "1940: " + props["1940pop"] + " <- - -> (" + props["1940"] + "% change)<br>" +
+                "1950: " + props["1950pop"] + " <- - -> (" + props["1950"] + "% change)<br>" +
+                "1960: " + props["1960pop"] + " <- - -> (" + props["1960"] + "% change)<br>" +
+                "1970: " + props["1970pop"] + " <- - -> (" + props["1970"] + "% change)<br>" +
+                "1980: " + props["1980pop"] + " <- - -> (" + props["1980"] + "% change)<br>" +
+                "1990: " + props["1990pop"] + " <- - -> (" + props["1990"] + "% change)<br>" +
+                "2000: " + props["2000pop"] + " <- - -> (" + props["2000"] + "% change)<br>" +
+                "2010: " + props["2010pop"] + " <- - -> (" + props["2000"] + "% change)"
+
+            //jquery passing the html info
+            $(".info").html(html);
         }
 
     </script>
