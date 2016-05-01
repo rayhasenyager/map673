@@ -3,11 +3,12 @@
 
 <head>
     <meta charset=utf-8 />
-    <title>US Unemployement Rates 2001-2013</title>
+    <title>AL Population Growth Rates 1900-2010</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/1.0.1/simple_statistics.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
@@ -132,43 +133,211 @@
 </head>
 
 <body>
-    <h1>Alabama Population Growth by County: 1900 - 2010</h1>
+    <h1>AL Population Growth Rates 1910-2010</h1>
     <div id="map"></div>
+    <div id="ui-controls">
+        <label><span class="min">1910</span><span class="max">2010</span>
+            <input type="range" min="1910" , max="2010" , value="1910" , step="10" , class="year-slider">
+        </label>
+    </div>
 
     <script>
         // instantiate the Leaflet map
         var options = {
-            center: [38.2, -94],
-            zoom: 1,
-            minZoom: 1,
-            maxZoom: 6,
+            center: [33, -87],
+            zoom: 7,
+            minZoom: 7,
+            maxZoom: 12,
             dragging: true,
             zoomControl: true
         }
         var map = L.map('map', options);
 
+        // load map tiles and add to map
+        var tiles = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            maxZoom: 16
+        }).addTo(map);
+
+        // declare global variables
+        var dataLayer;
+        attribute = '1910';
+
         // AJAX requests to load data files
-        $.getJSON('county3.json', function(county) {
-            Papa.parse('pop.csv', {
+        $.getJSON('county3.json', function(counties) {
+            Papa.parse('pops.csv', {
                 download: true,
                 header: true,
                 complete: function(data) {
-                    processData(county, data);
+                    processData(counties, data);
                 }
             }); // end of Papa.parse()
         });
 
-        function processData(county, data) {
-            for (var county in county.features) {
 
-                var props = county.features[county].properties;
-
+        // function to process/bind data
+        function processData(counties, data) {
+            for (var county in counties.features) {
+                var props = counties.features[county].properties;
                 for (var d in data.data) {
+                    if (props.CNTYFP == data.data[d].county_fips) {
+                        counties.features[county].properties = data.data[d];
+                        break;
+                    }
+                } // inner for loop is complete
+            } // outer for loop is complete
+            drawLegend();
+            drawMap(counties);
+            createSliderUI();
+        }
 
-                    console.log(props.CNTYFP, data.data[d].County_FIPS);
-
+        // function to draw the map
+        function drawMap(counties) {
+            dataLayer = L.geoJson(counties, {
+                style: function(feature) {
+                    return {
+                        color: '#252525',
+                        weight: 1,
+                        fillOpacity: 1,
+                        fillColor: '#1f78b4'
+                    }
                 }
+            }).addTo(map);
+            dataLayer.eachLayer(function(layer) {
+                layer.setStyle({
+                    fillColor: layer.feature.properties[counties]
+                });
+                updateMap();
+            });
+        }
+
+        // function to update the map
+        function updateMap() {
+            var breaks = getClassBreaks();
+            dataLayer.eachLayer(function(layer) {
+                layer.setStyle({
+                    fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
+                })
+            })
+            updateLegend(breaks);
+        }
+
+        //executes class breaks function
+        function getClassBreaks() {
+
+            //creates an empty array to hold data
+            var values = [];
+
+            //loop
+            dataLayer.eachLayer(function(layer) {
+
+                //calculation for the normalized value
+                var value = layer.feature.properties[attribute];
+
+                //value being pushed to the clusters variable.
+                values.push(value);
+            });
+
+            //creation of 5 quintiles using simple statistics javascript.
+            var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
+
+            //returns breaks array data
+            return breaks;
+        }
+
+        // function to get the color value
+        function getColor(d, breaks) {
+
+            //each statement below returns a clor value based on the array value specified.
+            if (d <= breaks[1]) {
+                return '#edf8e9';
+            } else if (d <= breaks[2]) {
+                return '#bae4b3';
+            } else if (d <= breaks[3]) {
+                return '#74c476';
+            } else if (d <= breaks[4]) {
+                return '#31a354'
+            } else if (d <= breaks[5]) {
+                return '#006d2c'
             }
+        }
+
+        //executes the legend function.
+        function drawLegend() {
+
+            //variable names the where the legend control will be placed on the map (topleft).
+            var legend = L.control({
+                position: 'topleft'
+            });
+
+            //when the legend is added to the map
+            legend.onAdd = function(map) {
+
+                //creates a new HTML <div> element and names it 'legend'.
+                var div = L.DomUtil.create('div', 'legend');
+
+                //returns the <div> element
+                return div;
+            };
+
+            //adds the legend to the map.
+            legend.addTo(map);
+        }
+
+        // function to update the legend
+        function updateLegend(breaks) {
+
+            //variable for the html for the legend title
+            var legend = $('.legend').html("<h3>% Growth: " + attribute + "</h3><ul>");
+
+            //for each break
+            for (var i = 0; i < breaks.length - 1; i++) {
+
+                //determines color for each array set (span)
+                var color = getColor(breaks[i + 1], breaks);
+
+                //creates the text for each break segement.
+                $('.legend ul').append('<li><span style="background:' + color + '"></span> ' + breaks[i] + ' &mdash; ' + breaks[i + 1] + '</li>');
+            }
+            legend.append("</ul>");
+        }
+
+        // function to create the range slider
+        function createSliderUI() {
+
+            // create a Leaflet control object and store a reference to it in a variable
+            var sliderControl = L.control({
+                position: 'bottomleft'
+            });
+
+            // when we add this control object to the map
+            sliderControl.onAdd = function(map) {
+
+                // select an existing DOM element with an id of "ui-controls"
+                var slider = L.DomUtil.get("ui-controls");
+
+                // when the user clicks on the slider element
+                L.DomEvent.addListener(slider, 'mousedown', function(e) {
+
+                    // prevent the click event from bubbling up to the map
+                    L.DomEvent.stopPropagation(e);
+                });
+
+                // return the slider from the onAdd method
+                return slider;
+            }
+
+            // add the control object containing our slider element to the map
+            sliderControl.addTo(map);
+
+
+            $(".year-slider")
+
+
+            .on('input change', function() {
+                attribute = $(this).val();
+                updateMap();
+            });
         }
 
     </script>
