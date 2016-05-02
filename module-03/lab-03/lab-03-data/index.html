@@ -3,7 +3,7 @@
 
 <head>
     <meta charset=utf-8 />
-    <title>AL Population Growth Rates 1900-2010</title>
+    <title>AL Population Growth</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
@@ -39,6 +39,21 @@
             background: rgba(75, 75, 75, 0.8);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             border-radius: 5px;
+        }
+        
+        h2 {
+            position: absolute;
+            z-index: 100;
+            bottom: 30px;
+            right: 10px;
+            padding: 8px 15px;
+            margin: 0;
+            color: whitesmoke;
+            font-size: 1em;
+            background: rgba(75, 75, 75, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            text-align: right;
         }
         
         #map {
@@ -143,12 +158,23 @@
             margin: 0;
             color: whitesmoke;
         }
+        
+        a {
+            text-decoration: none;
+        }
 
     </style>
 </head>
 
 <body>
-    <h1>AL Population Growth Rates 1910-2010</h1>
+    <h1>Alabama Population Growth Rates 1910 - 2010</h1>
+    
+<!--    tried to set the colors to whitesmoke using css, but it negatively affected the leaflet link in the map attribution-->
+    <h2>Data Sources:<br>
+        <a href="https://www.census.gov/population/cencounts/al190090.txt">1900 to 1990 Population</a><br>
+        <a href="http://www.census.gov/geo/maps-data/data/gazetteer2000.html">2000 Population</a><br>
+        <a href="http://www.census.gov/geo/maps-data/data/gazetteer2010.html">2010 Population</a><br>
+        <a href="http://eric.clst.org/Stuff/USGeoJSON">County Polygons</a></h2>
     <div id="map"></div>
     <div id="ui-controls">
         <label><span class="min">1910</span><span class="max">2010</span>
@@ -157,18 +183,21 @@
     </div>
 
     <script>
-        // instantiate the Leaflet map
+        // Comments appear above the code being referenced.
+        
+        // set map options for map center, zoom level, and does allowing minimal zooming.
         var options = {
-            center: [33, -87],
-            zoom: 7,
-            minZoom: 7,
-            maxZoom: 8,
-            dragging: true,
-            zoomControl: true
-        }
+                center: [33, -87],
+                zoom: 7,
+                minZoom: 7,
+                maxZoom: 8,
+                dragging: true,
+                zoomControl: true
+            }
+            // instantiate the Leaflet map 
         var map = L.map('map', options);
 
-        // load map tiles and add to map
+        // load map tiles and add to map -- I debated using no tiles in order to optimize the map zoom level to my screen, but realized users will be viewing on different screens.
         var tiles = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
             maxZoom: 8
@@ -180,86 +209,112 @@
 
         // AJAX requests to load data files
         $.getJSON('county3.json', function(counties) {
+            
+            // initiate Papa.parse() to load csv data
             Papa.parse('pops.csv', {
                 download: true,
                 header: true,
                 complete: function(data) {
+                    
+                    //fire the processData function
                     processData(counties, data);
                 }
-            }); // end of Papa.parse()
+            });
         });
 
 
         // function to process/bind data
         function processData(counties, data) {
+            
+            // begin outer loop to run through the json data
             for (var county in counties.features) {
+                
+                // variable defining where to point the function in matching data
                 var props = counties.features[county].properties;
+                
+                // begin inner loop to run through the csv data
                 for (var d in data.data) {
+                    
+                    // match data fields from csv to the json file
                     if (props.CNTYFP == data.data[d].county_fips) {
                         counties.features[county].properties = data.data[d];
+                        
+                        //stops the function once the data matches
                         break;
                     }
-                } // inner for loop is complete
-            } // outer for loop is complete
+                }
+            }
+            //the 4 lines below fires the indicated functions--only drawMap pass data
             drawLegend();
             drawMap(counties);
             createSliderUI();
             drawInfo();
         }
 
-        // function to draw the map
+        // function to draw the map--received counties data
         function drawMap(counties) {
 
+            // variable to add polygons to the leaflet map 
             dataLayer = L.geoJson(counties, {
+                
+                // initially set polygon border and fill properties
                 style: function(feature) {
                     return {
                         color: '#252525',
-                        weight: 2,
+                        weight: 1,
                         fillOpacity: 1,
                         fillColor: '#1f78b4'
                     }
                 }
 
+            // add polygons to the map    
             }).addTo(map);
 
+            // fires the function to update the map for user functionality
             updateMap();
         }
 
         // function to update the map
         function updateMap() {
 
-            //variable for class breaks function
+            // variable for class breaks function
             var breaks = getClassBreaks();
 
-            //@@@@@@@@##@#@
+            // loop for each json layer
             dataLayer.eachLayer(function(layer) {
                 layer.setStyle({
                     fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
                 })
             })
+            
+            // fire function to update the legend and passes breaks data
             updateLegend(breaks);
         }
 
-        //executes class breaks function
+        // executes class breaks function
         function getClassBreaks() {
 
-            //creates an empty array to hold data
+            // creates an empty array to hold data
             var values = [];
 
-            //loop
+            // loop through each layer
             dataLayer.eachLayer(function(layer) {
 
+                // variable to shorten path through item properties
                 var props = layer.feature.properties;
 
-                //calculation for the normalized value
+                // deaclares value from attribute
                 var value = props[attribute];
 
-                //value being pushed to the clusters variable.
+                // variable to ensure valies are converted from string values
+                var value = parseFloat(layer.feature.properties[attribute]);
+
+                //value being pushed to the quintile variable.
                 values.push(value);
 
-                //pop up text and data and calculated data
-                layer.bindPopup("<b>" + props["county"] + " County</b><br>" + value + "%");
-                
+                //pop up of text and data and calculated data
+                layer.bindPopup("<b>" + props["county"] + " County</b><br>" + value + "% Growth");
+
                 //event for when user mouses over a polygon causing the border to turn yellow
                 layer.on('mouseover', function() {
                     layer.setStyle({
@@ -268,44 +323,44 @@
                         dashArray: ''
                     });
 
-                    //this script allows the mouseover to work in Internet Explorer and Opera
+                    // allows the mouseover to work in Internet Explorer and Opera
                     if (!L.Browser.ie && !L.Browser.opera) {
                         layer.bringToFront();
                     }
-                    //calls the undateInfo function and passes the 'this' jQuery selection
+                    // calls the undateInfo function and passes the 'this' jQuery selection
                     updateInfo(this);
                 });
-                
-                //event for when the user moves the mouse away from a polygon returning the border to it previous style
+
+                // event for when the user moves the mouse away from a polygon returning the border to it previous style
                 layer.on('mouseout', function() {
                     layer.setStyle({
                         color: '#252525',
-                        weight: 2,
+                        weight: 1,
                     });
                 });
 
-                //event for mouseover to show data in the info window. 
+                // event for mouseover to show data in the info window. 
                 dataLayer.on('mouseover', function() {
                     $(".info").show();
                 });
-                
-                //event for mouseover to hide data in the info window. 
+
+                // event for mouseover to hide data in the info window. 
                 dataLayer.on('mouseout', function() {
                     $(".info").hide();
                 });
             });
 
-            //creation of 5 quintiles using simple statistics javascript.
+            // creation of 5 quintiles using simple statistics javascript.
             var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
 
-            //returns breaks array data
+            // returns breaks array data
             return breaks;
         }
 
         // function to get the color value
         function getColor(d, breaks) {
 
-            //each statement below returns a clor value based on the array value specified.
+            // each statement below returns a clor value based on the array value specified.
             if (d <= breaks[1]) {
                 return '#edf8e9';
             } else if (d <= breaks[2]) {
@@ -319,43 +374,44 @@
             }
         }
 
-        //executes the legend function.
+        // executes the legend function.
         function drawLegend() {
 
-            //variable names the where the legend control will be placed on the map (topleft).
+            // variable names the where the legend control will be placed on the map (topleft).
             var legend = L.control({
                 position: 'topleft'
             });
 
-            //when the legend is added to the map
+            // when the legend is added to the map
             legend.onAdd = function() {
 
-                //creates a new HTML <div> element and names it 'legend'.
+                // creates a new HTML <div> element and names it 'legend'.
                 var div = L.DomUtil.create('div', 'legend');
 
-                //returns the <div> element
+                // returns the <div> element
                 return div;
             };
 
-            //adds the legend to the map.
+            // adds the legend to the map.
             legend.addTo(map);
         }
 
         // function to update the legend
         function updateLegend(breaks) {
 
-            //variable for the html for the legend title
+            // variable for the html for the legend title
             var legend = $('.legend').html("<h3>% Growth: " + attribute + "</h3><ul>");
 
-            //for each break
+            // loop through each break
             for (var i = 0; i < breaks.length - 1; i++) {
 
-                //determines color for each array set (span)
+                // determines color for each array set (span)
                 var color = getColor(breaks[i + 1], breaks);
 
-                //creates the text for each break segement.
+                // creates the text for each break segement.
                 $('.legend ul').append('<li><span style="background:' + color + '"></span> ' + breaks[i] + ' &mdash; ' + breaks[i + 1] + '</li>');
             }
+            // append the update to the legend
             legend.append("</ul>");
         }
 
@@ -387,12 +443,16 @@
             // add the control object containing our slider element to the map
             sliderControl.addTo(map);
 
-
+            // designates the slider as a year-slider
             $(".year-slider")
 
-
+            // waits for an event
             .on('input change', function() {
+                
+                // sets the attibute to the selected value
                 attribute = $(this).val();
+                
+                // fires the udpate map function
                 updateMap();
             });
         }
@@ -430,18 +490,18 @@
 
             //html for the info box data to be displayed.
             var html = "<h3>" + props['county'] + " County Population / Growth</h3>" +
-                "1900: " + props["1900pop"] + " <- - -> (" + "base year)<br>" +
-                "1910: " + props["1910pop"] + " <- - -> (" + props["1910"] + "% change)<br>" +
-                "1920: " + props["1920pop"] + " <- - -> (" + props["1920"] + "% change)<br>" +
-                "1930: " + props["1930pop"] + " <- - -> (" + props["1930"] + "% change)<br>" +
-                "1940: " + props["1940pop"] + " <- - -> (" + props["1940"] + "% change)<br>" +
-                "1950: " + props["1950pop"] + " <- - -> (" + props["1950"] + "% change)<br>" +
-                "1960: " + props["1960pop"] + " <- - -> (" + props["1960"] + "% change)<br>" +
-                "1970: " + props["1970pop"] + " <- - -> (" + props["1970"] + "% change)<br>" +
-                "1980: " + props["1980pop"] + " <- - -> (" + props["1980"] + "% change)<br>" +
-                "1990: " + props["1990pop"] + " <- - -> (" + props["1990"] + "% change)<br>" +
-                "2000: " + props["2000pop"] + " <- - -> (" + props["2000"] + "% change)<br>" +
-                "2010: " + props["2010pop"] + " <- - -> (" + props["2000"] + "% change)"
+                "1900: " + props["1900pop"] + " (" + "base year)<br>" +
+                "1910: " + props["1910pop"] + " (" + props["1910"] + "% change)<br>" +
+                "1920: " + props["1920pop"] + " (" + props["1920"] + "% change)<br>" +
+                "1930: " + props["1930pop"] + " (" + props["1930"] + "% change)<br>" +
+                "1940: " + props["1940pop"] + " (" + props["1940"] + "% change)<br>" +
+                "1950: " + props["1950pop"] + " (" + props["1950"] + "% change)<br>" +
+                "1960: " + props["1960pop"] + " (" + props["1960"] + "% change)<br>" +
+                "1970: " + props["1970pop"] + " (" + props["1970"] + "% change)<br>" +
+                "1980: " + props["1980pop"] + " (" + props["1980"] + "% change)<br>" +
+                "1990: " + props["1990pop"] + " (" + props["1990"] + "% change)<br>" +
+                "2000: " + props["2000pop"] + " (" + props["2000"] + "% change)<br>" +
+                "2010: " + props["2010pop"] + " (" + props["2010"] + "% change)"
 
             //jquery passing the html info
             $(".info").html(html);
