@@ -305,36 +305,13 @@
             dataLayer.eachLayer(function(layer) {
                 layer.setStyle({
                     fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
-                })
-            })
-            
-            // fire function to update the legend and passes breaks data
-            updateLegend(breaks);
-        }
-
-        // executes class breaks function
-        function getClassBreaks() {
-
-            // creates an empty array to hold data
-            var values = [];
-
-            // loop through each layer
-            dataLayer.eachLayer(function(layer) {
-
+                });
+                
                 // variable to shorten path through item properties
                 var props = layer.feature.properties;
-
-                // deaclares value from attribute
-                var value = props[attribute];
-
-                // variable to ensure valies are converted from string values
-                var value = parseFloat(layer.feature.properties[attribute]);
-
-                //value being pushed to the quintile variable.
-                values.push(value);
-
+                
                 //pop up of text and data and calculated data
-                layer.bindPopup("<b>" + props["county"] + " County</b><br>" + value + "% Growth");
+                layer.bindPopup("<b>" + props["county"] + " County</b><br>" + props[attribute] + "% Growth");
 
                 //event for when user mouses over a polygon causing the border to turn yellow
                 layer.on('mouseover', function() {
@@ -369,6 +346,34 @@
                 dataLayer.on('mouseout', function() {
                     $(".info").hide();
                 });
+            })
+            
+            // fire function to update the legend and passes breaks data
+            updateLegend(breaks);
+        }
+
+        // executes class breaks function
+        function getClassBreaks() {
+
+            // creates an empty array to hold data
+            var values = [];
+
+            // loop through each layer
+            dataLayer.eachLayer(function(layer) {
+
+                // variable to shorten path through item properties
+                var props = layer.feature.properties;
+
+                // deaclares value from attribute
+                var value = props[attribute];
+
+                // variable to ensure valies are converted from string values
+                var value = parseFloat(layer.feature.properties[attribute]);
+
+                //value being pushed to the quintile variable.
+                values.push(value);
+
+                
             });
 
             // creation of 5 quintiles using simple statistics javascript.
