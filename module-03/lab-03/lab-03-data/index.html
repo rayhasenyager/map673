@@ -41,7 +41,7 @@
             border-radius: 5px;
         }
         
-        h2 {
+        #sources {
             position: absolute;
             z-index: 100;
             bottom: 30px;
@@ -49,13 +49,28 @@
             padding: 8px 15px;
             margin: 0;
             color: whitesmoke;
-            font-size: 1em;
             background: rgba(75, 75, 75, 0.8);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             border-radius: 5px;
             text-align: right;
         }
-        
+        #sources h2 {
+            font-size: 1.1em;
+            margin: 0 0 10px;
+        }
+        #sources ul {
+            font-size: 1em;
+            list-style-type: none;
+            
+            margin: 0;
+            padding: 0;
+        }
+        #sources a {
+            color: whitesmoke;
+        }
+        #sources a:hover {
+            text-decoration: underline;
+        }
         #map {
             position: absolute;
             width: 100%;
@@ -87,6 +102,7 @@
             font-weight: bold;
             color: whitesmoke;
             margin: 0;
+            width: 180px;
         }
         
         .legend ul {
@@ -152,6 +168,7 @@
             border-radius: 5px;
             text-align: right;
             color: whitesmoke;
+            width: 180px;
         }
         
         .info h3 {
@@ -170,11 +187,15 @@
     <h1>Alabama Population Growth Rates 1910 - 2010</h1>
     
 <!--    tried to set the colors to whitesmoke using css, but it negatively affected the leaflet link in the map attribution-->
-    <h2>Data Sources:<br>
-        <a href="https://www.census.gov/population/cencounts/al190090.txt">1900 to 1990 Population</a><br>
-        <a href="http://www.census.gov/geo/maps-data/data/gazetteer2000.html">2000 Population</a><br>
-        <a href="http://www.census.gov/geo/maps-data/data/gazetteer2010.html">2010 Population</a><br>
-        <a href="http://eric.clst.org/Stuff/USGeoJSON">County Polygons</a></h2>
+    <div id='sources'>
+        <h2>Data Sources:</h2>
+        <ul>
+            <li><a href="https://www.census.gov/population/cencounts/al190090.txt">1900 to 1990 Population</a></li>
+             <li><a href="http://www.census.gov/geo/maps-data/data/gazetteer2000.html">2000 Population</a></li>
+             <li><a href="http://www.census.gov/geo/maps-data/data/gazetteer2010.html">2010 Population</a></li>
+             <li><a href="http://eric.clst.org/Stuff/USGeoJSON">County Polygons</a></li>
+        </ul>
+    </div>
     <div id="map"></div>
     <div id="ui-controls">
         <label><span class="min">1910</span><span class="max">2010</span>
