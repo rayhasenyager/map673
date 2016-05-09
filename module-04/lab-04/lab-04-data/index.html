@@ -44,7 +44,6 @@
         
         $.getJSON('county.geojson', function(data) {
             
-            
             dataLayer = L.geoJson(data, {
             style: function(feature) {
                 return {
