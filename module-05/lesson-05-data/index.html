@@ -5,6 +5,7 @@
     <meta charset=utf-8 />
     <title>Kenya Livestock Populations</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    
     <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
     <script src='https://code.jquery.com/jquery-1.12.0.min.js'></script>
@@ -15,13 +16,129 @@
         body {
             margin: 0;
             padding: 0;
+            background: whitesmoke;
+            font-family: "Work Sans", sans-serif;
+        }
+        
+        #side-panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 33%;
+            background: whitesmoke;
+            border-right: 2px solid #1C9976;
+            overflow-y: scroll;
+        }
+        
+        h1 {
+            padding: 8px 25px 8px 15px;
+            margin: 0;
+            background: #1C9976;
+            color: whitesmoke;
+            font-weight: 400;
+            font-size: 1.5em;
+            text-align: right;
+        }
+        
+        h2 {
+            margin: 0;
+            padding: 8px 25px 8px 15px;
+            color: #1C9976;
+            font-weight: 500;
+            font-size: 1.2em;
+            text-align: right;
+        }
+        
+        #side-panel p {
+            margin: 8px 0 4px;
+            padding: 0 25px 0 15px;
+            color: #3d3d3d;
+            text-align: right;
+            font-size: 1em;
+        }
+        
+        #side-panel p:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        #side-panel img {
+            float: right;
+            margin: 0 0 15px 15px;
         }
         
         #map {
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 100%;
+            right: 0;
+            width: 67%;
+        }
+            
+        #grade {
+            position: absolute;
+            bottom: 60px;
+            left: 36%;
+            padding: 6px 15px 8px;
+            background: whitesmoke;
+            border: 2px solid #1C9976;
+            padding: 6px 15px 8px;
+            border-radius: 3px;
+            color: #1C9976;
+            font-size: 1em;
+        }
+        
+        #legend {
+            position: absolute;
+            right: 15px;
+            bottom: 20px;
+            padding: 8px 15px;
+            background: whitesmoke;
+            border: 2px solid #1C9976;
+            border-radius: 3px;
+            color: #1C9976;
+            width: 160px;
+            height: 220px;
+        }
+        
+        #legend h3 {
+            text-align: right;
+            font-weight: 500;
+            margin: 10px 0 20px;
+        }
+        
+        #info {
+            padding: 8px 15px;
+            background: whitesmoke;
+            border: 2px solid #1C9976;
+            border-radius: 3px;
+            color: #1C9976;
+            position: absolute;
+            font-size: 1em;
+            max-width: 200px;
+        }
+        
+        #info p {
+            margin: 3px 0 4px;
+        }
+        
+        .cattle {
+            color: #6813D2;
+        }
+        
+        .goats {
+            color: #FF1B43;
+        }
+        
+        .sheep {
+            color: #FFE40C;
+        }
+        
+        #info span:last-child {
+            font-size: 1.3em;
+            font-weight: 500;
         }
 
     </style>
@@ -32,8 +149,37 @@
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
 
     <div id='map'></div>
+    <div id='side-panel'>
+        <h1>Livestock populations in Kenya</h1>
+        <h2>2014 enrollment rates for boys and girls</h2>>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam mollis laoreet elementum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec mi eros, rutrum sed orci eget, venenatis varius est. Pellentesque accumsan est vitae risus malesuada fringilla.</p>
+        <p><img src="images/legend.png" alt="legend"></p>
+        <p>Cras at massa in leo aliquam fermentum. Nunc auctor vestibulum sagittis. Aliquam pulvinar, ipsum in pulvinar tincidunt, enim metus fermentum tellus, quis accumsan ex lorem ut ante. Phasellus fermentum orci eget interdum ultrices. Proin vitae magna id odio ultricies placerat quis id ex. Aenean volutpat volutpat gravida.</p>
+        <h2>About this map</h2>
+        <p>Phasellus in ante nec augue pulvinar pellentesque id vitae nunc. Donec tincidunt metus metus, sed rhoncus ex vehicula sed. Donec erat felis, dignissim bibendum metus ut, tincidunt dictum ligula. Aliquam interdum gravida enim id aliquet. Duis sed ex sed mi aliquam hendrerit. Nunc egestas in lorem ac consectetur. Donec quis rhoncus metus.</p>
+        <h2>About the data</h2>
+        <p>Phasellus in ante nec augue pulvinar pellentesque id vitae nunc. Donec tincidunt metus metus, sed rhoncus ex vehicula sed. Donec erat felis, dignissim bibendum metus ut, tincidunt dictum ligula. Aliquam interdum gravida enim id aliquet. Duis sed ex sed mi aliquam hendrerit. Nunc egestas in lorem ac consectetur. Donec quis rhoncus metus.</p>
+    </div>
+    <div id="legend">
+        <h3>Livestock populations per county</h3>
+        <svg class="legend" width="200" height="200"></svg>
+    </div>
+    <div id="info">
+        <p>County: <span></span></p>
+        <p class="Cattle">Cattle <span></span>: <span></span></p>
+        <p class="Goats">Goats <span></span>: <span></span></p>
+        <p class="Sheep">Sheep <span></span>: <span></span></p>
+    </div>
+    
+    <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500,600' rel='stylesheet' type='text/css'>    
 
     <script>
+        
+        var cattle,
+            goats,
+            sheep,
+            scaleFactor = .05;
+        
         L.mapbox.accessToken = 'pk.eyJ1IjoicmF5aGFzZW55YWdlciIsImEiOiJjaW03djhsZGswMHBvdm1tMHdvam54djRzIn0.E4iemJxzce4ZKFxgLjT57w';
 
         var map = L.mapbox.map('map', 'mapbox.light', {
@@ -58,7 +204,145 @@
         }).addTo(map);
         });
 
-        omnivore.csv('livestock_pop_by_district_2009.csv').addTo(map);
+        var countyCentroids = omnivore.csv('livestock_county_2009.csv')
+            .on('ready', function(e) {
+                drawMap(e.target.toGeoJSON());
+            })
+            .on('error', function(e) {
+                console.log(e.error[0].message);
+            });
+        function drawMap(stockData) {
+//            // access to stockData here
+        }
+        
+        function drawMap(stockData) {
+            Cattle = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Cattle)),
+                        color: '#6813D2',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+            goats = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Goats)),
+                        color: '#FF1B43',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+            sheep = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Sheep)),
+                        color: '#FFE40C',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+//            updateSymbols();
+            infoWindow();
+        }
+        
+        function calcRadius(val) {
+            var radius = Math.sqrt(val / Math.PI);
+            return radius * scaleFactor;
+        }
+        
+//        function updateSymbols() {
+//            var radius, // variable to hold each radius
+//                allRadii = []; // empty array to hold all values
+//            cattle.eachLayer(function(layer) {
+//                // store a reference to the radius value
+//                radius = calcRadius((layer.feature.properties['Cattle']));
+//                // use it to set the radius of the layer
+//                layer.setRadius(radius);
+//                // push it into the array
+//                allRadii.push(radius);
+//            });
+//            goats.eachLayer(function(layer) {
+//                radius = calcRadius((layer.feature.properties['Goats']));
+//                layer.setRadius(radius);
+//                allRadii.push(radius);
+//            });
+//            sheep.eachLayer(function(layer) {
+//                radius = calcRadius((layer.feature.properties['Sheep']));
+//                layer.setRadius(radius);
+//                allRadii.push(radius);
+//            });
+//            drawLegend(allRadii);
+//        }
+        
+//        function drawLegend(allRadii) {
+//            var legend = $('.legend');
+//            var circles = {
+//                max: ss.max(allRadii),
+//                median: ss.median(allRadii),
+//                min: ss.min(allRadii)
+//            }
+//            var svgCircles = '';
+//            var reverseCalc = function(radius) {
+//                return Math.round((Math.pow(radius / scaleFactor, 2) * Math.PI));
+//            }
+//            for (var circle in circles) {
+//                svgCircles += '<circle cx="' + 80 + '" cy="' + (circles[circle] - 140) * -1 + '" r="' + circles[circle] + '" stroke="#1C9976" stroke-width="1" fill="ghostwhite" />';
+//                svgCircles += '<text x="' + 60 + '" y = "' + (circles[circle] - 120) * -1 + '" fill= "#1C9976">' + reverseCalc(circles[circle]) + '</text>'
+//            }
+//            
+//            legend.html(svgCircles)
+//        }
+        
+        function infoWindow() {
+            var info = $('#info');
+            goats.on('mouseover', function(e) {
+                var props = e.layer.feature.properties;
+                info.show();
+                $('#info span').text(props.County);
+                $(".cattle span:first-child").text('(cattle)');
+                $(".goats span:first-child").text('(goats)');
+                $(".sheep span:first-child").text('(sheep)');
+                $(".cattle span:last-child").text(props['C'].toLocaleString());
+                $(".goats span:last-child").text(props['G'].toLocaleString());
+                $(".sheep span:last-child").text(props['S'].toLocaleString());
+                e.layer.setStyle({
+                    fillOpacity: .6
+                });
+            });
+            goats.on('mouseout', function(e) {
+                info.hide();
+                e.layer.setStyle({
+                    fillOpacity: 0
+                });
+            });
+            $(document).mousemove(function(e) {
+                // first offset from the mouse position of the info window
+                info.css({
+                    "left": e.pageX + 6,
+                    "top": e.pageY - info.height() - 15
+                });
+                // if it crashes into the top, flip it lower right
+                if (info.offset().top < 4) {
+                    info.css({
+                        "top": e.pageY + 15
+                    });
+                }
+                // do the same for crashing into the right
+                if (info.offset().left + info.width() >= $(document).width() - 40) {
+                    info.css({
+                        "left": e.pageX - info.width() - 30
+                    });
+                }
+            });
+        }
 
     </script>
 </body>
