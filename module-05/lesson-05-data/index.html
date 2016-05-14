@@ -5,13 +5,13 @@
     <meta charset=utf-8 />
     <title>Kenya Livestock Populations</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    
+
     <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
     <script src='https://code.jquery.com/jquery-1.12.0.min.js'></script>
 
     <link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
-    
+
     <style>
         body {
             margin: 0;
@@ -76,19 +76,6 @@
             right: 0;
             width: 67%;
         }
-            
-        #grade {
-            position: absolute;
-            bottom: 60px;
-            left: 36%;
-            padding: 6px 15px 8px;
-            background: whitesmoke;
-            border: 2px solid #1C9976;
-            padding: 6px 15px 8px;
-            border-radius: 3px;
-            color: #1C9976;
-            font-size: 1em;
-        }
         
         #legend {
             position: absolute;
@@ -100,13 +87,30 @@
             border-radius: 3px;
             color: #1C9976;
             width: 160px;
-            height: 220px;
+            height: 250px;
         }
         
         #legend h3 {
             text-align: right;
             font-weight: 500;
             margin: 10px 0 20px;
+        }
+        
+        #legend h4 {
+            text-align: left;
+            font-weight: 250;
+            margin: 10px 0 20px;
+        }
+        
+        #legend span {
+            display: circle;
+            border-radius: 50%/50%;
+            float: left;
+            height: 15px;
+            width: 15px;
+            text-align: right;
+            font-size: 9px;
+            color: #1C9976;
         }
         
         #info {
@@ -161,25 +165,36 @@
         <p>Phasellus in ante nec augue pulvinar pellentesque id vitae nunc. Donec tincidunt metus metus, sed rhoncus ex vehicula sed. Donec erat felis, dignissim bibendum metus ut, tincidunt dictum ligula. Aliquam interdum gravida enim id aliquet. Duis sed ex sed mi aliquam hendrerit. Nunc egestas in lorem ac consectetur. Donec quis rhoncus metus.</p>
     </div>
     <div id="legend">
-        <h3>Livestock populations per county</h3>
-        <svg class="legend" width="200" height="200"></svg>
-    </div>
-    <div id="info">
-        <p>County: <span></span></p>
-        <p class="Cattle">Cattle <span></span>: <span></span></p>
-        <p class="Goats">Goats <span></span>: <span></span></p>
-        <p class="Sheep">Sheep <span></span>: <span></span></p>
+        <h3>Livestock per County</h3>
+        <h4>Circles</h4>
+        <p class="cattle"><span style='background:#6813D2;'></span>
+            <label> Cattle</label>
+        </p>
+        <p class="goats"><span style='background:#FF1B43;'></span>
+            <label> Goats</label>
+        </p>
+        <p class="sheep"><span style='background:#FFE40C;'></span>
+            <label> Sheep</label>
+        </p>
+        <small>Source: <a href="https://opendata.go.ke/">Kenya Open Data</a></small>
     </div>
     
-    <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500,600' rel='stylesheet' type='text/css'>    
+    <div id="info">
+        <p>County: <span></span></p>
+        <p class="cattle">Cattle <span></span>: <span></span></p>
+        <p class="goats">Goats <span></span>: <span></span></p>
+        <p class="sheep">Sheep <span></span>: <span></span></p>
+    </div>
+
+
+    <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500,600' rel='stylesheet' type='text/css'>
 
     <script>
-        
         var cattle,
             goats,
             sheep,
             scaleFactor = .05;
-        
+
         L.mapbox.accessToken = 'pk.eyJ1IjoicmF5aGFzZW55YWdlciIsImEiOiJjaW03djhsZGswMHBvdm1tMHdvam54djRzIn0.E4iemJxzce4ZKFxgLjT57w';
 
         var map = L.mapbox.map('map', 'mapbox.light', {
@@ -189,20 +204,20 @@
             maxZoom: 9,
             maxBounds: L.latLngBounds([-6.22, 27.72], [5.76, 47.83])
         });
-        
-        $.getJSON('county.geojson', function(data) {
-            
-            dataLayer = L.geoJson(data, {
-            style: function(feature) {
-                return {
-                    color: '#dddddd', //grey borders
-                    weight: 2, //border thickness
-                    fillOpacity: .3, //no opacity
-                    fillColor: '#1f78b4'
-                };
-            }
-        }).addTo(map);
-        });
+
+        //        $.getJSON('county.geojson', function(data) {
+        //
+        //            dataLayer = L.geoJson(data, {
+        //                style: function(feature) {
+        //                    return {
+        //                        color: '#dddddd', //grey borders
+        //                        weight: 2, //border thickness
+        //                        fillOpacity: .3, //no opacity
+        //                        fillColor: '#1f78b4'
+        //                    };
+        //                }
+        //            }).addTo(map);
+        //        });
 
         var countyCentroids = omnivore.csv('livestock_county_2009.csv')
             .on('ready', function(e) {
@@ -211,12 +226,14 @@
             .on('error', function(e) {
                 console.log(e.error[0].message);
             });
+
         function drawMap(stockData) {
-//            // access to stockData here
+            // access to stockData here
         }
-        
+
         function drawMap(stockData) {
-            Cattle = L.geoJson(stockData, {
+
+            cattle = L.geoJson(stockData, {
                 pointToLayer: function(feature, layer) {
                     return L.circleMarker(layer, {
                         radius: calcRadius(Number(feature.properties.Cattle)),
@@ -227,6 +244,7 @@
                     });
                 }
             }).addTo(map);
+
             goats = L.geoJson(stockData, {
                 pointToLayer: function(feature, layer) {
                     return L.circleMarker(layer, {
@@ -238,6 +256,7 @@
                     });
                 }
             }).addTo(map);
+
             sheep = L.geoJson(stockData, {
                 pointToLayer: function(feature, layer) {
                     return L.circleMarker(layer, {
@@ -249,80 +268,65 @@
                     });
                 }
             }).addTo(map);
-//            updateSymbols();
+            drawLegend();
             infoWindow();
         }
-        
+
         function calcRadius(val) {
             var radius = Math.sqrt(val / Math.PI);
             return radius * scaleFactor;
         }
-        
-//        function updateSymbols() {
-//            var radius, // variable to hold each radius
-//                allRadii = []; // empty array to hold all values
-//            cattle.eachLayer(function(layer) {
-//                // store a reference to the radius value
-//                radius = calcRadius((layer.feature.properties['Cattle']));
-//                // use it to set the radius of the layer
-//                layer.setRadius(radius);
-//                // push it into the array
-//                allRadii.push(radius);
-//            });
-//            goats.eachLayer(function(layer) {
-//                radius = calcRadius((layer.feature.properties['Goats']));
-//                layer.setRadius(radius);
-//                allRadii.push(radius);
-//            });
-//            sheep.eachLayer(function(layer) {
-//                radius = calcRadius((layer.feature.properties['Sheep']));
-//                layer.setRadius(radius);
-//                allRadii.push(radius);
-//            });
-//            drawLegend(allRadii);
-//        }
-        
-//        function drawLegend(allRadii) {
-//            var legend = $('.legend');
-//            var circles = {
-//                max: ss.max(allRadii),
-//                median: ss.median(allRadii),
-//                min: ss.min(allRadii)
-//            }
-//            var svgCircles = '';
-//            var reverseCalc = function(radius) {
-//                return Math.round((Math.pow(radius / scaleFactor, 2) * Math.PI));
-//            }
-//            for (var circle in circles) {
-//                svgCircles += '<circle cx="' + 80 + '" cy="' + (circles[circle] - 140) * -1 + '" r="' + circles[circle] + '" stroke="#1C9976" stroke-width="1" fill="ghostwhite" />';
-//                svgCircles += '<text x="' + 60 + '" y = "' + (circles[circle] - 120) * -1 + '" fill= "#1C9976">' + reverseCalc(circles[circle]) + '</text>'
-//            }
-//            
-//            legend.html(svgCircles)
-//        }
-        
+
+        function drawLegend() {
+
+            var legend = $('.legend');
+
+            legend.html()
+        }
+
+        $.getJSON('county.geojson', function(data) {
+
+            dataLayer = L.geoJson(data, {
+                style: function(feature) {
+                    return {
+                        color: '#dddddd', //grey borders
+                        weight: 2, //border thickness
+                        fillOpacity: .3, //no opacity
+                        fillColor: '#1f78b4'
+                    };
+                }
+            }).addTo(map).bringToBack();
+        });
+
         function infoWindow() {
+
             var info = $('#info');
-            goats.on('mouseover', function(e) {
+
+            sheep.on('mouseover', function(e) {
                 var props = e.layer.feature.properties;
+
                 info.show();
                 $('#info span').text(props.County);
-                $(".cattle span:first-child").text('(cattle)');
-                $(".goats span:first-child").text('(goats)');
-                $(".sheep span:first-child").text('(sheep)');
-                $(".cattle span:last-child").text(props['C'].toLocaleString());
-                $(".goats span:last-child").text(props['G'].toLocaleString());
-                $(".sheep span:last-child").text(props['S'].toLocaleString());
+                $(".cattle span:first-child").text(' ');
+                $(".goats span:first-child").text('');
+                $(".sheep span:first-child").text(' ');
+
+                $(".cattle span:last-child").text(props.Cattle.toLocaleString());
+                $(".goats span:last-child").text(props.Goats.toLocaleString());
+                $(".sheep span:last-child").text(props.Sheep.toLocaleString());
+
                 e.layer.setStyle({
                     fillOpacity: .6
                 });
             });
-            goats.on('mouseout', function(e) {
+
+            sheep.on('mouseout', function(e) {
                 info.hide();
                 e.layer.setStyle({
                     fillOpacity: 0
                 });
             });
+
             $(document).mousemove(function(e) {
                 // first offset from the mouse position of the info window
                 info.css({
