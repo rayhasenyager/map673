@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Kenya Livestock Populations</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
+    <script src='https://code.jquery.com/jquery-1.12.0.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/1.0.1/simple_statistics.js"></script>
+    
+    <link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: whitesmoke;
+            font-family: "Work Sans", sans-serif;
+        }
+        
+        #side-panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 33%;
+            background: whitesmoke;
+            border-right: 2px solid #1C9976;
+            overflow-y: scroll;
+        }
+        
+        h1 {
+            padding: 8px 25px 8px 15px;
+            margin: 0;
+            background: #1C9976;
+            color: whitesmoke;
+            font-weight: 400;
+            font-size: 1.5em;
+            text-align: right;
+        }
+        
+        h2 {
+            margin: 0;
+            padding: 8px 25px 8px 15px;
+            color: #1C9976;
+            font-weight: 500;
+            font-size: 1.2em;
+            text-align: right;
+        }
+        
+        #side-panel p {
+            margin: 8px 0 4px;
+            padding: 0 25px 0 15px;
+            color: #3d3d3d;
+            text-align: right;
+            font-size: 1em;
+        }
+        
+        #side-panel p:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        #side-panel img {
+            float: right;
+            margin: 0 0 15px 15px;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 67%;
+        }
+        
+        #legend {
+            position: absolute;
+            right: 15px;
+            bottom: 20px;
+            padding: 8px 15px;
+            background: whitesmoke;
+            border: 2px solid #1C9976;
+            border-radius: 3px;
+            color: #1C9976;
+            width: 160px;
+            height: 300px;
+        }
+        
+        #legend h3 {
+            text-align: right;
+            font-weight: 500;
+            margin: 10px 0 20px;
+        }
+        
+        #legend h4 {
+            text-align: left;
+            font-weight: 250;
+            margin: 10px 0 20px;
+        }
+        
+        #legend span {
+            display: circle;
+            border-radius: 50%/50%;
+            float: left;
+            height: 15px;
+            width: 15px;
+            text-align: right;
+            font-size: 9px;
+            color: #1C9976;
+        }
+        
+        #info {
+            padding: 8px 15px;
+            background: whitesmoke;
+            border: 2px solid #1C9976;
+            border-radius: 3px;
+            color: #1C9976;
+            position: absolute;
+            font-size: 1em;
+            max-width: 200px;
+        }
+        
+        #info p {
+            margin: 3px 0 4px;
+        }
+        
+        .cattle {
+            color: #6813D2;
+        }
+        
+        .goats {
+            color: #F23C13;
+        }
+        
+        .sheep {
+            color: #008000;
+        }
+        
+        .total {
+            color: #CD853F;
+        }
+        
+        .density {
+            color: #CD853F;
+        }
+        
+        #info span:last-child {
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
+
+    <div id='map'></div>
+    <div id='side-panel'>
+        <h1>Livestock populations in Kenya</h1>
+        <h2>2014 enrollment rates for boys and girls</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam mollis laoreet elementum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec mi eros, rutrum sed orci eget, venenatis varius est. Pellentesque accumsan est vitae risus malesuada fringilla.</p>
+        <p>Cras at massa in leo aliquam fermentum. Nunc auctor vestibulum sagittis. Aliquam pulvinar, ipsum in pulvinar tincidunt, enim metus fermentum tellus, quis accumsan ex lorem ut ante. Phasellus fermentum orci eget interdum ultrices. Proin vitae magna id odio ultricies placerat quis id ex. Aenean volutpat volutpat gravida.</p>
+        <h2>About this map</h2>
+        <p>Phasellus in ante nec augue pulvinar pellentesque id vitae nunc. Donec tincidunt metus metus, sed rhoncus ex vehicula sed. Donec erat felis, dignissim bibendum metus ut, tincidunt dictum ligula. Aliquam interdum gravida enim id aliquet. Duis sed ex sed mi aliquam hendrerit. Nunc egestas in lorem ac consectetur. Donec quis rhoncus metus.</p>
+        <h2>About the data</h2>
+        <p>Phasellus in ante nec augue pulvinar pellentesque id vitae nunc. Donec tincidunt metus metus, sed rhoncus ex vehicula sed. Donec erat felis, dignissim bibendum metus ut, tincidunt dictum ligula. Aliquam interdum gravida enim id aliquet. Duis sed ex sed mi aliquam hendrerit. Nunc egestas in lorem ac consectetur. Donec quis rhoncus metus.</p>
+    </div>
+    <div id="legend">
+        <h3>Livestock per County</h3>
+        <h4>Circles:</h4>
+        <p class="cattle"><span style='background:#6813D2;'></span>
+            <label> Cattle</label>
+        </p>
+        <p class="goats"><span style='background:#F23C13;'></span>
+            <label> Goats</label>
+        </p>
+        <p class="sheep"><span style='background:#008000;'></span>
+            <label> Sheep</label>
+        </p>
+        <h4>Counties:</h4>
+        <small>Source: <a href="https://opendata.go.ke/">Kenya Open Data</a></small>
+    </div>
+
+    <div id="info">
+        <p>County: <span></span></p>
+        <p class="cattle">Cattle <span></span>: <span></span></p>
+        <p class="goats">Goats <span></span>: <span></span></p>
+        <p class="sheep">Sheep <span></span>: <span></span></p>
+        <p class="total">Total <span></span>: <span></span></p>
+        <p class="density">Density <span></span>: <span></span></p>
+    </div>
+
+
+    <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500,600' rel='stylesheet' type='text/css'>
+
+    <script>
+        var dataLayer,
+            cattle,
+            goats,
+            sheep,
+            total,
+            density,
+            scaleFactor = .05;
+
+        L.mapbox.accessToken = 'pk.eyJ1IjoicmF5aGFzZW55YWdlciIsImEiOiJjaW03djhsZGswMHBvdm1tMHdvam54djRzIn0.E4iemJxzce4ZKFxgLjT57w';
+
+        var map = L.mapbox.map('map', 'mapbox.light', {
+            center: [-.23, 37.8],
+            zoom: 7,
+            minZoom: 6,
+            maxZoom: 9,
+            maxBounds: L.latLngBounds([-6.22, 27.72], [5.76, 47.83])
+        });
+
+        var countyCentroids = omnivore.csv('livestock_county_2009.csv')
+            .on('ready', function(e) {
+                drawMap(e.target.toGeoJSON());
+            })
+            .on('error', function(e) {
+                console.log(e.error[0].message);
+            });
+
+        function drawMap(stockData) {
+            // access to stockData here
+        }
+
+        function drawMap(stockData) {
+
+            cattle = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Cattle)),
+                        color: '#6813D2',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+
+            goats = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Goats)),
+                        color: '#F23C13',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+
+            sheep = L.geoJson(stockData, {
+                pointToLayer: function(feature, layer) {
+                    return L.circleMarker(layer, {
+                        radius: calcRadius(Number(feature.properties.Sheep)),
+                        color: '#008000',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0
+                    });
+                }
+            }).addTo(map);
+            drawLegend();
+            infoWindow();
+        }
+
+        function calcRadius(val) {
+            var radius = Math.sqrt(val / Math.PI);
+            return radius * scaleFactor;
+        }
+
+        function drawLegend() {
+
+            var legend = $('.legend');
+
+            legend.html()
+        }
+
+        $.getJSON('county.geojson', function(county) {
+
+            dataLayer = L.geoJson(county, {
+                style: function(feature) {
+                    return {
+                        color: '#dddddd', //grey borders
+                        weight: 2, //border thickness
+                        fillOpacity: .3, //no opacity
+                        fillColor: '#CCC7B3'
+                    };
+                }
+            });
+            drawCounties(county);
+        });
+
+        function infoWindow() {
+
+            var info = $('#info');
+
+            sheep.on('mouseover', function(e) {
+                var props = e.layer.feature.properties;
+
+                info.show();
+                $('#info span').text(props.County);
+                $(".cattle span:first-child").text(' ');
+                $(".goats span:first-child").text('');
+                $(".sheep span:first-child").text(' ');
+                $(".total span:first-child").text(' ');
+                $(".density span:first-child").text(' ');
+
+                $(".cattle span:last-child").text(props.Cattle.toLocaleString());
+                $(".goats span:last-child").text(props.Goats.toLocaleString());
+                $(".sheep span:last-child").text(props.Sheep.toLocaleString());
+                $(".total span:last-child").text(props.Total.toLocaleString());
+                $(".density span:last-child").text(props.density.toLocaleString());
+
+                e.layer.setStyle({
+                    fillOpacity: .4
+                });
+            });
+
+            sheep.on('mouseout', function(e) {
+                info.hide();
+                e.layer.setStyle({
+                    fillOpacity: 0
+                });
+            });
+
+            $(document).mousemove(function(e) {
+                // first offset from the mouse position of the info window
+                info.css({
+                    "left": e.pageX + 6,
+                    "top": e.pageY - info.height() - 15
+                });
+                // if it crashes into the top, flip it lower right
+                if (info.offset().top < 4) {
+                    info.css({
+                        "top": e.pageY + 15
+                    });
+                }
+                // do the same for crashing into the right
+                if (info.offset().left + info.width() >= $(document).width() - 40) {
+                    info.css({
+                        "left": e.pageX - info.width() - 30
+                    });
+                }
+            });
+        }
+
+        function drawCounties(county) {
+            dataLayer = L.geoJson(county, {
+
+                // initially set polygon border and fill properties
+                style: function(feature) {
+                        return {
+                            color: '#252525',
+                            weight: 1,
+                            fillOpacity: 1,
+                            fillColor: '#1f78b4'
+                        }
+                    }
+                    // add polygons to the map    
+            }).addTo(map).bringToBack();
+            // fires the function to update the map for user functionality
+            updateMap();
+        }
+
+        function updateMap() {
+
+            var breaks = getClassBreaks();
+
+            dataLayer.eachLayer(function(layer) {
+                layer.setStyle({
+                    fillColor: getColor(Number(layer.feature.properties.density), breaks)
+                });
+
+                // variable to shorten path through item properties
+                var props = layer.feature.properties;
+                console.log(props);
+
+                layer.bindPopup("<b>" + props["COUNTY"] + " County</b><br>" + (Number(props.density)) + "livestock per km/sq");
+            });
+            updateLegend(breaks);
+        }
+
+        function updateLegend(breaks) {
+            // variable for the html for the legend title
+            var legend = $('.legend').html("<h3>% Growth: " + (Number(density)) + "</h3><ul>");
+            // loop through each break
+            for (var i = 0; i < breaks.length - 1; i++) {
+                // determines color for each array set (span)
+                var color = getColor(breaks[i + 1], breaks);
+                // creates the text for each break segement.
+                $('.legend ul').append('<li><span style="background:' + color + '"></span> ' + breaks[i] + ' &mdash; ' + breaks[i + 1] + '</li>');
+            }
+            // append the update to the legend
+            legend.append("</ul>");
+        }
+
+        function getClassBreaks() {
+            // creates an empty array to hold data
+            var values = [];
+            // loop through each layer
+            dataLayer.eachLayer(function(layer) {
+                // variable to shorten path through item properties
+                var props = layer.feature.properties;
+                // deaclares value from attribute
+                var value = (Number(props.density));
+                // variable to ensure valies are converted from string values
+                var value = parseFloat(Number(layer.feature.properties.density));
+                //value being pushed to the quintile variable.
+                values.push(value);
+
+            });
+            // creation of 5 quintiles using simple statistics javascript.
+            var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
+            // returns breaks array data
+            return breaks;
+        }
+
+        function getColor(d, breaks) {
+            // each statement below returns a clor value based on the array value specified.
+            if (d <= breaks[1]) {
+                return '#edf8e9';
+            } else if (d <= breaks[2]) {
+                return '#bae4b3';
+            } else if (d <= breaks[3]) {
+                return '#74c476';
+            } else if (d <= breaks[4]) {
+                return '#31a354'
+            } else if (d <= breaks[5]) {
+                return '#006d2c'
+            }
+        }
+
+    </script>
+</body>
+
+</html>
