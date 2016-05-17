@@ -88,19 +88,21 @@
             border-radius: 3px;
             color: #8B4513;
             width: 160px;
-            height: 500px;
         }
         
         #legend h3 {
-            text-align: right;
+            text-align: left;
             font-weight: 500;
             margin: 10px 0 20px;
         }
         
         #legend h4 {
             text-align: left;
-            font-weight: 250;
+            font-weight: 500;
             margin: 10px 0 20px;
+        }
+        #legend p {
+            margin: 0 0 5px 0;
         }
         
         #legend span {
@@ -111,6 +113,13 @@
             width: 15px;
             text-align: right;
             font-size: 9px;
+            color: #8B4513;
+            margin-right: 10px;
+        }
+        #legend span.square {
+            border-radius: 0;
+        }
+        #legend a {
             color: #8B4513;
         }
         
@@ -123,6 +132,7 @@
             position: absolute;
             font-size: 1em;
             max-width: 200px;
+            display: none;
         }
         
         #info span:last-child {
@@ -168,7 +178,6 @@
     </div>
     <div id="legend">
         <h3>Livestock per county</h3>
-        <h4>Rings:</h4>
         <p class="cattle"><span style='background:#6813D2;'></span>
             <label> Cattle</label>
         </p>
@@ -179,19 +188,19 @@
             <label> Sheep</label>
         </p>
         <h4>Counties (livestock per sq km):</h4>
-        <p class="zero"><span style='background:#ca641c;'></span>
+        <p class="zero"><span class="square" style='background:#ca641c;'></span>
             <label> 21.41 - 55.99</label>
         </p>
-        <p class="one"><span style='background:#9d4e15;'></span>
+        <p class="one"><span class="square" style='background:#9d4e15;'></span>
             <label> 71.76 - 95.5</label>
         </p>
-        <p class="two"><span style='background:#874312;'></span>
+        <p class="two"><span class="square" style='background:#874312;'></span>
             <label> 137.84 - 190.62</label>
         </p>
-        <p class="three"><span style='background:#5a2d0c;'></span>
+        <p class="three"><span class="square" style='background:#5a2d0c;'></span>
             <label> 195.8 - 263.93</label>
         </p>
-        <p class="four"><span style='background:#2d1606;'></span>
+        <p class="four"><span class="square" style='background:#2d1606;'></span>
             <label> 296.34 - 362.96</label>
         </p>
         <small>Source: <a href="https://opendata.go.ke/">Kenya Open Data</a></small>
