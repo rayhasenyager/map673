@@ -28,29 +28,48 @@
 
     <script type="cartocss/html" id="counties-styles">
 
-        #uninsured_adults_county { polygon-fill: #FFFFB2; polygon-opacity: 0.8; polygon-comp-op: lighten; line-color: #FFF; line-width: 0.5; line-opacity: 1; } #uninsured_adults_county [ uninsured
-        <=52] { polygon-fill: #B10026; } #uninsured_adults_county [ uninsured <=43] { polygon-fill: #E31A1C; } #uninsured_adults_county [ uninsured <=36] { polygon-fill: #FC4E2A; } #uninsured_adults_county [ uninsured <=30] { polygon-fill: #FD8D3C; } #uninsured_adults_county [ uninsured <=23] { polygon-fill: #FEB24C; } #uninsured_adults_county [ uninsured <=17] { polygon-fill: #FED976; } #uninsured_adults_county [ uninsured <=10] { polygon-fill: #FFFFB2; } </script>
+        #uninsured_adults_county{
+          polygon-fill: #FFFFB2;
+          polygon-opacity: 0.8;
+          polygon-comp-op: lighten;
+          line-color: #FFF;
+          line-width: 0.5;
+          line-opacity: 1;
+        }
+        #uninsured_adults_county [uninsured <= 52] {
+           polygon-fill: #B10026;
+        }
+        #uninsured_adults_county [uninsured <= 43] {
+           polygon-fill: #E31A1C;
+        }
+        #uninsured_adults_county [uninsured <= 36] {
+           polygon-fill: #FC4E2A;
+        }
+        #uninsured_adults_county [uninsured <= 30] {
+           polygon-fill: #FD8D3C;
+        }
+        #uninsured_adults_county [uninsured <= 23] {
+           polygon-fill: #FEB24C;
+        }
+        #uninsured_adults_county [uninsured <= 17] {
+           polygon-fill: #FED976;
+        }
+        #uninsured_adults_county [uninsured <= 10] {
+           polygon-fill: #FFFFB2;
+        }
+</script>
 
             <script>
                 //        instantiate our map
                 var map = new L.Map("map", {
-                    center: [-10, 0],
-                    zoom: 2
+                    center: [5, -1],
+                    zoom: 4.5
                 });
-
-                var cartoCSS = '#uninsured_adults_county{' +
-                    'polygon-fill: steelblue;' +
-                    'polygon-opacity: 0.8;' +
-                    'polygon-comp-op: lighten;' +
-                    'line-color: #FFFFFF;' +
-                    'line-width: 0.5;' +
-                    'line-opacity: 1;' +
-                    '}';
 
                 var gratCartoCSS = '#na_grat_clipped{' +
                     'line-color: #ffffff;' +
                     'line-width: 2;' +
-                    'line-opacity: 0.1;' +
+                    'line-opacity: 0.4;' +
                     '}'
 
                 var landCartoCSS = '#na_land_clipped{' +
@@ -62,7 +81,7 @@
                     '}'
 
                 var sourceObject = {
-                    user_name: 'rgdonohue',
+                    user_name: 'rayhasenyager',
                     type: 'cartodb',
                     sublayers: [{
                         sql: "SELECT ST_Transform(the_geom, 2163) AS the_geom_webmercator FROM na_grat_clipped",
