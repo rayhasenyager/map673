@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Roadway Fatality Reduction</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+    <style>
+        html, body, #map {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        #side-panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 20%;
+            background: whitesmoke;
+            border-right: 2px solid #08519c;
+            overflow-y: scroll;
+        }
+
+        h1 {
+            font-family: 'Alegreya', serif;
+            padding: 8px 25px 8px 15px;
+            margin: 0;
+            background: #08519c;
+            color: whitesmoke;
+            font-weight: 400;
+            font-size: 1.5em;
+            text-align: right;
+        }
+
+        h2 {
+            font-family: 'Roboto Condensed', sans-serif;
+            margin: 0;
+            padding: 8px 25px 8px 15px;
+            color: #08519c;
+            font-weight: 500;
+            font-size: 1.2em;
+            text-align: right;
+        }
+        
+        p {
+            font-family: 'Roboto', sans-serif;
+            font-size: 15px;
+            line-height: 23px;
+            margin: 0 0 23px 0;
+        }
+
+        #side-panel p {
+            margin: 8px 0 4px;
+            padding: 0 25px 0 15px;
+            color: #3d3d3d;
+            text-align: right;
+            font-size: 1em;
+        }
+
+        #side-panel p:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+    </style>
+</head>
+
+<body>
+    
+    <ul class="legend-selector"> </ul>
+
+    <div id="map"></div>
+    
+    <div id='side-panel'>
+        <h1>Fatal Roadway Accidents</h1>
+        <p>As the parent of a child studying for his driver's permit, I was looking at traffic safety statistics. I wondered how safe the roads are and was surprised at the reduction of traffic related deaths. Even with the advent of texting and other distrated driving habits, higher posted highway speed limits, and the move to smaller cars, roadway fatalies have decreased over the last 20 years.</p>
+        <h2>About the map</h2>
+        <p>The map displays by state, the decline in fatalities of drivers, passengers, cyclists, and pedestrians from 1994 to 2014.</p>
+        <h2>About the data</h2>
+        <p>The data is provided by the <a href="http://www-fars.nhtsa.dot.gov/">Fatality Analysis Reporting System (FARS) Encyclopedia</a> of the National Highway Traffic Safety Administration (NHTSA). Darker states had the greatest reduction in roadway fatalities. The percentages reflect decrease in the number of deaths per 100 million miles driven. </p>
+        <h2>Further thoughts</h2>
+        <p>What are the drivers fo the reduction of traffic related deaths. Better designed cars (crumple zones and air bags) and reductions in drunk driving quickly come to mind. Reviewing the data, rates declined from 1994 to 2001 and then incased and not decling again until 2007. This may include mode shifting from air travel (historically safer than driving) to driving to avoid increased waits and intrusive searches at airports--there is currently a <a href="https://www.washingtonpost.com/local/trafficandcommuting/lawsuit-challenges-tsas-use-of-full-body-scanners-in-airports/2016/05/02/a0006b44-1099-11e6-8967-7ac733c56f12_story.html">lawsuit</a> trying to overturn some airport screening processes so increase the efficiency of security processing due to the TSA (Transportation Security Administration) not adequately taking mode shifting into its evaluation of its processes .</p>
+    </div>
+
+    <div class='cartodb-legend density'>  
+        <ul>
+          <li class="min">
+          <h2>Roadway Fatality Reduction 1994-2014</h2>
+          </li>
+
+          <li class="graph leg" style="border-radius: 0; border:none">
+          <div class="colors">
+            <div class="quartile" style="background-color:#eff3ff"></div>
+            <div class="quartile" style="background-color:#bdd7e7"></div>
+            <div class="quartile" style="background-color:#6baed6"></div>
+            <div class="quartile" style="background-color:#3182bd"></div>
+            <div class="quartile" style="background-color:#08519c"></div>
+          </div>
+            <div class="colors" style="font-weight:normal; text-align: center">
+            <div class="quartile" style="padding-top: 5px" ><p>[0-8%]</p></div>
+            <div class="quartile" style="padding-top: 5px" ><p>[9-20%]</p></div>
+            <div class="quartile" style="padding-top: 5px" ><p>[20-30%]</p></div>
+            <div class="quartile" style="padding-top: 5px" ><p>[30-42%]</p></div>
+            <div class="quartile" style="padding-top: 5px" ><p>[43-58%]</p></div>
+          </div>
+          </li>
+        </ul>
+    </div>
+
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
+
+    <script type="cartocss/html" id="fatalities-styles">
+
+        #state_fatalities{
+          polygon-fill: #43618F;
+          polygon-opacity: 0.8;
+          line-color: #FFF;
+          line-width: 0.5;
+          line-opacity: 1;
+        }
+        #state_fatalities [ diffm <= -8] {
+           polygon-fill: #eff3ff;
+        }
+        #state_fatalities [ diffm <= -21] {
+           polygon-fill: #bdd7e7;
+        }
+        #state_fatalities [ diffm <= -31] {
+           polygon-fill: #6baed6;
+        }
+        #state_fatalities [ diffm <= -43] {
+           polygon-fill: #3182bd;
+        }
+        #state_fatalities [ diffm <= -58] {
+           polygon-fill: #08519c;
+        }
+</script>
+
+            <script>
+                var map = new L.Map("map", {
+                    zoomControl: false,
+                    center: [3, -17],
+                    zoom: 4.5
+                });
+                                
+                var gratCartoCSS = '#na_grat_clipped{' +
+                    'line-color: #ffffff;' +
+                    'line-width: 2;' +
+                    'line-opacity: 0.4;' +
+                    '}'
+
+                var landCartoCSS = '#na_land_clipped{' +
+                    'polygon-fill: #323232;' +
+                    'polygon-opacity: 1;' +
+                    'line-color: #FFF;' +
+                    'line-width: 0;' +
+                    'line-opacity: 1;' +
+                    '}'
+
+                var sourceObject = {
+                    user_name: 'rayhasenyager',
+                    type: 'cartodb',
+                    sublayers: [{
+                        sql: "SELECT ST_Transform(the_geom, 2163) AS the_geom_webmercator FROM na_grat_clipped",
+                        cartocss: gratCartoCSS
+                    }, {
+                        sql: "SELECT ST_Transform(the_geom, 2163) AS the_geom_webmercator FROM na_land_clipped",
+                        cartocss: landCartoCSS
+                    }, {
+                        sql: "SELECT ST_Transform(the_geom, 2163) AS the_geom_webmercator, cartodb_id, diffM FROM state_fatalities",
+                        cartocss: $("#fatalities-styles").text()
+                    }]
+                }
+
+                cartodb.createLayer(map, sourceObject).addTo(map)
+//                    .done(function(layer) {
+                     
+            </script>
+</body>
+
+</html>
