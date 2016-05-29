@@ -81,7 +81,7 @@
             .await(makeMap);
         
         function makeMap(error, counties, na) {
-            
+                        
             var breaks = ss.jenks(counties.features.map(function(d) { 
                 return d.properties.uninsured; 
             }), 5);
