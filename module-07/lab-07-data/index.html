@@ -101,6 +101,7 @@
                 .style("fill", function(d) {
                     return color( d.properties.rate)
                 })
+                .style('stroke', '#FAEBD7')
                 .on('mouseover', function(d, i) {
                     var currentCounty = this;
                     d3.select(this)
