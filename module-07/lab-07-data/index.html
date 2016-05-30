@@ -14,7 +14,7 @@
             border: 1px solid #d3d3d3;
         }
         
-        h1, h2, h3 {
+        h1, h2, h3, h4, h5 {
             position: absolute;
             left: 20px;
             top: 10px;
@@ -24,12 +24,22 @@
         }
         
         h2 {
-            top: 60px;
+            top: 95px;
             font-size: 1.2em;
         }
         
         h3 {
-            top: 85px;
+            top: 120px;
+            font-size: 1em;
+        }
+        
+        h4 {
+            top: 95px;
+            font-size: 1.2em;
+        }
+        
+        h5 {
+            top: 120px;
             font-size: 1em;
         }
         
@@ -55,9 +65,11 @@
 
 <body>
     
-    <h1>Alabama Alcohol Policy by County</h1>
+    <h1>Alabama Alcohol Policy:<br> dry counties and wet cities</h1>
     <h2></h2>
     <h3></h3>
+    <h4></h4>
+    <h5></h5>
     <div id="map"></div>
     
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -135,7 +147,25 @@
                     return d.position[1];
                 })
                 .attr("r", 5)
-                .attr("class", "town");
+                .attr("class", "town")
+                .on('mouseover', function(d, i) {
+                    var currentCity = this;
+                    d3.select(this)
+                    .style({
+                        'fill': '#DC143C',
+                        });
+                    d3.select("h4").text('City or Club Name');
+                    d3.select("h5").text(d.city);
+                    })
+                .on('mouseout', function(d, i) {
+                    d3.select("h4").text("");
+                    d3.select("h5").text("");
+                    d3.selectAll('circle')
+                    .style({
+                        'fill': '#00008B'
+                        });
+                    })
+
         }
         
     </script>
